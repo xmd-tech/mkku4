@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XMD | Deploy Your Bot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .logo p {
+            color: #aaa;
+            margin-top: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00d9ff;
+            font-weight: 500;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #00d9ff;
+        }
+        input::placeholder, textarea::placeholder {
+            color: #666;
+        }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+        .btn-deploy {
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            color: #1a1a2e;
+        }
+        .btn-session {
+            background: linear-gradient(90deg, #ff6b6b, #ffa500);
+            color: #fff;
+        }
+        .btn-deploy:hover, .btn-session:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 217, 255, 0.4);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+        .status.success {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            display: block;
+        }
+        .status.error {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            display: block;
+        }
+        .status.loading {
+            background: rgba(0, 217, 255, 0.2);
+            border: 1px solid #00d9ff;
+            color: #00d9ff;
+            display: block;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        .info ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        .info li {
+            margin-bottom: 5px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00d9ff;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00d9ff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: #666;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.2);
+        }
+        .divider span {
+            padding: 0 15px;
+            font-size: 12px;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            color: #00d9ff;
+            font-size: 1.3rem;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        .code-display {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .code-display .code {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ff88;
+            letter-spacing: 5px;
+            font-family: monospace;
+        }
+        .code-display .copy-btn {
+            margin-top: 10px;
+            padding: 8px 20px;
+            background: #00d9ff;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .instructions {
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid #ffa500;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        .instructions ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        #modalStatus {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>XMD</h1>
+            <p>Deploy Your WhatsApp Bot</p>
+        </div>
+        
+        <!-- Get Session Button -->
+        <button type="button" class="btn btn-session" id="getSessionBtn">
+            Get Session ID - Tap Here
+        </button>
+        
+        <div class="divider"><span>OR ENTER YOUR SESSION</span></div>
+        
+        <form id="deployForm">
+            <div class="form-group">
+                <label for="session">Session ID</label>
+                <textarea id="session" placeholder="Paste your session ID here (e.g., XMDxxxxxxx... or XMDI...)" required></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-deploy" id="deployBtn">
+                Deploy Bot
+            </button>
+        </form>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="activeBots">-</div>
+                <div class="stat-label">Active Bots</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">7</div>
+                <div class="stat-label">Days Valid</div>
+            </div>
+        </div>
+        
+        <div class="info">
+            <strong>How it works:</strong>
+            <ul>
+                <li>Get your session ID using the button above</li>
+                <li>Paste your WhatsApp session ID</li>
+                <li>Your bot will connect to XMD network</li>
+                <li>Bot runs for 7 days automatically</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Session Modal -->
+    <div class="modal" id="sessionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Get Session ID</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            
+            <!-- Step 1: Enter Phone Number -->
+            <div class="step active" id="step1">
+                <div class="form-group">
+                    <label for="phoneNumber">Enter Your Phone Number</label>
+                    <input type="text" id="phoneNumber" placeholder="e.g., 254710772666 (with country code, no +)">
+                </div>
+                <button type="button" class="btn btn-deploy" id="getPairBtn">
+                    Get Pairing Code
+                </button>
+                <div id="modalStatus" class="status"></div>
+            </div>
+            
+            <!-- Step 2: Show Code & Instructions -->
+            <div class="step" id="step2">
+                <div class="code-display">
+                    <p style="color: #aaa; margin-bottom: 10px;">Your Pairing Code:</p>
+                    <div class="code" id="pairCode">--------</div>
+                    <button class="copy-btn" id="copyCodeBtn">Copy Code</button>
+                </div>
+                
+                <div class="instructions">
+                    <strong>Next Steps:</strong>
+                    <ol>
+                        <li>Open WhatsApp on your phone</li>
+                        <li>Go to Settings > Linked Devices</li>
+                        <li>Tap "Link a Device"</li>
+                        <li>Select "Link with phone number instead"</li>
+                        <li>Enter the pairing code above</li>
+                        <li>Wait for the session to generate</li>
+                        <li>Copy the session ID and paste it in the deploy form</li>
+                    </ol>
+                </div>
+                
+                <button type="button" class="btn btn-session" id="backBtn">
+                    Get Another Code
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('sessionModal');
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        
+        // Open modal
+        document.getElementById('getSessionBtn').addEventListener('click', () => {
+            modal.classList.add('active');
+            step1.classList.add('active');
+            step2.classList.remove('active');
+        });
+        
+        // Close modal
+        document.getElementById('closeModal').addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        
+        // Close on outside click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+        
+        // Get pairing code
+        document.getElementById('getPairBtn').addEventListener('click', async () => {
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const btn = document.getElementById('getPairBtn');
+            const modalStatus = document.getElementById('modalStatus');
+            
+            if (!phoneNumber || phoneNumber.length < 10) {
+                modalStatus.className = 'status error';
+                modalStatus.textContent = 'Please enter a valid phone number';
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Getting Code...';
+            modalStatus.className = 'status loading';
+            modalStatus.innerHTML = '<span class="spinner"></span> Generating pairing code...';
+            
+            try {
+                const response = await fetch('/xmd/pair', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ number: phoneNumber })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('pairCode').textContent = data.code;
+                    step1.classList.remove('active');
+                    step2.classList.add('active');
+                    modalStatus.className = 'status';
+                    modalStatus.style.display = 'none';
+                } else {
+                    modalStatus.className = 'status error';
+                    modalStatus.textContent = data.message || 'Failed to generate code';
+                }
+            } catch (error) {
+                modalStatus.className = 'status error';
+                modalStatus.textContent = 'Connection failed. Please try again.';
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Get Pairing Code';
+        });
+        
+        // Copy code
+        document.getElementById('copyCodeBtn').addEventListener('click', () => {
+            const code = document.getElementById('pairCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.getElementById('copyCodeBtn');
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = 'Copy Code', 2000);
+            });
+        });
+        
+        // Back button
+        document.getElementById('backBtn').addEventListener('click', () => {
+            step1.classList.add('active');
+            step2.classList.remove('active');
+            document.getElementById('phoneNumber').value = '';
+        });
+        
+        // Deploy form
+        document.getElementById('deployForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const session = document.getElementById('session').value.trim();
+            const btn = document.getElementById('deployBtn');
+            const status = document.getElementById('status');
+            
+            if (!session) {
+                status.className = 'status error';
+                status.textContent = 'Please enter a session ID';
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Deploying...';
+            status.className = 'status loading';
+            status.innerHTML = '<span class="spinner"></span> Connecting to XMD network...';
+            
+            try {
+                const response = await fetch('/xmd/deploy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ session })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    status.className = 'status success';
+                    status.innerHTML = `${data.message}<br><small>Bot ID: ${data.botId} | Expires: ${new Date(data.expiresAt).toLocaleDateString()}</small>`;
+                    document.getElementById('session').value = '';
+                    loadStats();
+                } else {
+                    status.className = 'status error';
+                    status.textContent = data.message;
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = 'Connection failed. Please try again.';
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Deploy Bot';
+        });
+        
+        async function loadStats() {
+            try {
+                const response = await fetch('/xmd/stats');
+                const data = await response.json();
+                document.getElementById('activeBots').textContent = data.activeBots || 0;
+            } catch (error) {
+                document.getElementById('activeBots').textContent = '-';
+            }
+        }
+        
+        loadStats();
+        setInterval(loadStats, 30000);
+    </script>
+</body>
+</html>

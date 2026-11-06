@@ -1,0 +1,48 @@
+{
+  "name": "BWM-XMD",
+  "description": "This is a simple whatsapp bot built with nodejs to make your WhatsApp enjoyable",
+  "keywords": [
+    "bot",
+    "whatsapp",
+    "BWM-XMD",
+    "whatsapp-stickers",
+    "anime",
+    "whatsapp-bot",
+    "whatsapp-sticker-bot",
+    "whatsapp-botto",
+    "baileys",
+    "baileys-md",
+    "md-bot"
+  ],
+  "website": "https://github.com/Bwmxmdgo/BWM-XMD-GO-V2#readme",
+  "repository": "https://github.com/Bwmxmdgo/BWM-XMD-GO-V2.git",
+  "logo": "https://files.catbox.moe/bkuj17.jpg",
+  "success_url": "/",
+  "env": {
+    "SESSION": {
+      "description": "Add your session id here",
+      "required": true
+    },
+    "OWNER_NUMBER": {
+      "description": "Put any phone numbers you want to be bot owner without + or spaces. Ex: 2547123456797",
+      "required": true
+    },
+    "DEVICE_MODE": {
+      "description": "Device mode: iPhone (plain text) or Android (full features with buttons)",
+      "value": "Android",
+      "required": true
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:essential-0",
+      "as": "DATABASE"
+    }
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
+    }
+  ],
+  "stack": "heroku-24"
+}
